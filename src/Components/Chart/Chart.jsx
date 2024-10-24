@@ -1,6 +1,6 @@
-import { useState } from "react"
-import { getData,capitalizeWords } from "../../utils.js"
-import "./Chart.css"
+import { useState, useMemo } from "react";
+import { getData, capitalizeWords } from "../../utils.js";
+import "./Chart.css";
 
 import {
   XAxis,
@@ -11,25 +11,17 @@ import {
   Bar,
   YAxis,
   Legend,
-} from "recharts"
+} from "recharts";
 
-function Chart({
-  title,
-  data,
-  dataKey,
-  grid,
-  parent,
-  child,
-  subtitle,
-  defaultValue,
-}) {
-  let a = getData(data, parent, child)
+function Chart({ title, data, parent, child, subtitle, defaultValue }) {
+  const processedData = useMemo(
+    () => getData(data, parent, child),
+    [data, parent, child]
+  );
 
-  const [view, setView] = useState(defaultValue[parent])
+  const [view, setView] = useState(defaultValue[parent]);
 
-  function OnchangeSetView(e) {
-    setView(e.target.value)
-  }
+  const options = useMemo(() => Object.keys(processedData), [processedData]);
 
   return (
     <div className="chart">
@@ -38,17 +30,19 @@ function Chart({
         <h5>
           {capitalizeWords(parent)} {subtitle}
         </h5>
-        <select onChange={OnchangeSetView}>
-          {Object.keys(a).map((e) => {
-            return <option key={e} value={e}>{e}</option>
-          })}
+        <select onChange={(e) => setView(e.target.value)} value={view}>
+          {options.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
         </select>
       </div>
-      <ResponsiveContainer width="100%" height="100%" aspect={2/1}>
+      <ResponsiveContainer width="100%" height="100%" aspect={2 / 1}>
         <BarChart
           width={700}
           height={300}
-          data={a[view]}
+          data={processedData[view]}
           margin={{
             top: 5,
             right: 30,
@@ -65,7 +59,7 @@ function Chart({
         </BarChart>
       </ResponsiveContainer>
     </div>
-  )
+  );
 }
 
-export default Chart
+export default Chart;
